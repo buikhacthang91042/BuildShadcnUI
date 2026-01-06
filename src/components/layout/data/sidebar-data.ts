@@ -21,6 +21,7 @@ import {
   AudioWaveform,
   Command,
   GalleryVerticalEnd,
+  Container,
 } from 'lucide-react'
 import { ClerkLogo } from '@/assets/clerk-logo'
 import { type SidebarData } from '../types'
@@ -128,16 +129,16 @@ export const sidebarData: SidebarData = {
           ],
         },
         {
-          title: 'Errors',
-          icon: Bug,
+          title: 'Thiết lập COS',
+          icon: Container,
           items: [
             {
-              title: 'Unauthorized',
+              title: 'Loại container',
               url: '/errors/unauthorized',
               icon: Lock,
             },
             {
-              title: 'Forbidden',
+              title: 'Danh mục hàng hóa',
               url: '/errors/forbidden',
               icon: UserX,
             },

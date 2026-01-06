@@ -1,24 +1,25 @@
+import { useEffect, useState } from 'react'
 import { useNavigate, useRouter } from '@tanstack/react-router'
+import { Container, getContainer } from '@/stores/container-store'
 import { Button } from '@/components/ui/button'
+import { ContainerTable } from './components/container-table'
 
 export function UnauthorisedError() {
   const navigate = useNavigate()
-  const { history } = useRouter()
+  const [containers, setContainers] = useState<Container[]>([])
+  useEffect(() => {
+    getContainer()
+      .then(setContainers)
+      .catch((err) => console.log('Lỗi tải dữ liệu:', err))
+  }, [])
   return (
     <div className='h-svh'>
-      <div className='m-auto flex h-full w-full flex-col items-center justify-center gap-2'>
-        <h1 className='text-[7rem] leading-tight font-bold'>401</h1>
-        <span className='font-medium'>Unauthorized Access</span>
-        <p className='text-center text-muted-foreground'>
-          Please log in with the appropriate credentials <br /> to access this
-          resource.
-        </p>
-        <div className='mt-6 flex gap-4'>
-          <Button variant='outline' onClick={() => history.go(-1)}>
-            Go Back
-          </Button>
-          <Button onClick={() => navigate({ to: '/' })}>Back to Home</Button>
+      <div className='flex flex-col p-6'>
+        <div className='flex justify-between'>
+          <h1 className='font-bold'>Container</h1>
+          <Button className='bg-orange-600'>Thêm mới</Button>
         </div>
+        <ContainerTable data={containers}  />
       </div>
     </div>
   )
