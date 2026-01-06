@@ -6,6 +6,7 @@ import {
   useReactTable,
 } from '@tanstack/react-table'
 import { Trash } from 'lucide-react'
+import { ContainerReplace, getContainerReplace } from '@/stores/container-store'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import {
@@ -19,7 +20,6 @@ import {
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
   TableHead,
   TableHeader,
@@ -27,12 +27,20 @@ import {
 } from '@/components/ui/table'
 import { Container } from '../data/schema'
 import { columns } from './columnDesign'
+import { ContainerEditDialog } from './container-edit-dialog'
 
 type DataContainerProps = {
   data: Container[]
 }
 export function ContainerTable({ data }: DataContainerProps) {
   const [rowSelection, setRowSelection] = useState({})
+  const [replaceContainers, setReplaceContainers] = useState<
+    ContainerReplace[]
+  >([])
+  const [editContainerType, setEditContainerType] = useState<string | null>(
+    null
+  )
+  const [openEdit, setOpenEdit] = useState(false)
   const table = useReactTable({
     data,
     columns,
@@ -41,6 +49,16 @@ export function ContainerTable({ data }: DataContainerProps) {
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
   })
+  const handleEdit = async (containerType: string) => {
+    try {
+      const data = await getContainerReplace(containerType)
+      setEditContainerType(containerType)
+      setReplaceContainers(data)
+      setOpenEdit(true)
+    } catch (error) {
+      console.log('Lỗi tải dữ liệu thay thế:', error)
+    }
+  }
   return (
     <div>
       <div className='mt-4 flex'>
@@ -54,9 +72,8 @@ export function ContainerTable({ data }: DataContainerProps) {
           <Trash className='h-4 w-4 group-hover:text-orange-500' />
         </Button>
       </div>
-      <div className='overflow-hidden rounded-lg'>
-        <Table className='mt-4 rounded-lg border'>
-          <TableCaption>Danh sách loại container</TableCaption>
+      <div className='mt-4 overflow-hidden rounded-md border'>
+        <Table className=''>
           <TableHeader className='h-12 bg-gray-100'>
             {table.getHeaderGroups().map((hg) => (
               <TableRow key={hg.id}>
@@ -76,7 +93,20 @@ export function ContainerTable({ data }: DataContainerProps) {
               <TableRow key={row.id}>
                 {row.getVisibleCells().map((cell) => (
                   <TableCell key={cell.id}>
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    {cell.column.id === 'action' ? (
+                      <span
+                        onClick={() => {
+                          handleEdit(row.original.containerType)
+                        }}
+                      >
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
+                      </span>
+                    ) : (
+                      flexRender(cell.column.columnDef.cell, cell.getContext())
+                    )}
                   </TableCell>
                 ))}
               </TableRow>
@@ -118,6 +148,14 @@ export function ContainerTable({ data }: DataContainerProps) {
           </PaginationItem>
         </PaginationContent>
       </Pagination>
+      {openEdit && (
+        <ContainerEditDialog
+          data={replaceContainers}
+          open={openEdit}
+          onOpenChange={setOpenEdit}
+          typeOfContainer={editContainerType}
+        />
+      )}
     </div>
   )
 }

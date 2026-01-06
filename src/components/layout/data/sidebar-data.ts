@@ -2,7 +2,6 @@ import {
   Construction,
   LayoutDashboard,
   Monitor,
-  Bug,
   ListTodo,
   FileX,
   HelpCircle,
@@ -134,7 +133,7 @@ export const sidebarData: SidebarData = {
           items: [
             {
               title: 'Loại container',
-              url: '/errors/unauthorized',
+              url: '/main/settings/cos/container',
               icon: Lock,
             },
             {
