@@ -1,7 +1,9 @@
-
 const BASE_URL = 'https://eco-cos-be-stage.smartlogvn.com/api/container'
 export type Container = {
   containerType: string
+}
+export type Containers = {
+  containerTypes: string[]
 }
 export type ContainerReplace = {
   id: string
@@ -47,6 +49,26 @@ export async function getContainerReplace(
       throw new Error('Unauthorized')
     }
     throw new Error('Failed to fetch container data')
+  }
+  return res.json()
+}
+
+export async function addNewContainerType(
+  containerTypes: string[]
+): Promise<Containers> {
+  const res = await fetch(`${BASE_URL}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ containerTypes }),
+  })
+  if (!res.ok) {
+    if (res.status === 401) {
+      throw new Error('Unauthorized')
+    }
+    throw new Error('Falied to post new container types')
   }
   return res.json()
 }
