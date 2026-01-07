@@ -72,3 +72,21 @@ export async function addNewContainerType(
   }
   return res.json()
 }
+
+export async function deleteContainerTypes(listContainerType: string[]) {
+  const res = await fetch(`${BASE_URL}`, {
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ listContainerType }),
+  })
+  if (!res.ok) {
+    if (res.status === 401) {
+      throw new Error('Unauthorized')
+    }
+    throw new Error('Falied to post new container types')
+  }
+  return res.json()
+}
