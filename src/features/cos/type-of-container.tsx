@@ -28,7 +28,7 @@ export function TypeOfContainer() {
             Thêm mới
           </Button>
         </div>
-        <ContainerTable data={containers} />
+        <ContainerTable data={containers} onSuccess={reloadContainers} />
       </div>
       {openAddContainer && (
         <ContainerAddDialog

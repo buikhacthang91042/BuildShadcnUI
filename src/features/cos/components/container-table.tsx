@@ -6,7 +6,11 @@ import {
   useReactTable,
 } from '@tanstack/react-table'
 import { Trash } from 'lucide-react'
-import { ContainerReplace, getContainerReplace } from '@/stores/container-store'
+import {
+  ContainerReplace,
+  deleteContainerTypes,
+  getContainerReplace,
+} from '@/stores/container-store'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import {
@@ -27,12 +31,14 @@ import {
 } from '@/components/ui/table'
 import { Container } from '../data/schema'
 import { columns } from './columnDesign'
+import { ContainerAlertDeleteDialog } from './container-alert-delete-dialog'
 import { ContainerEditDialog } from './container-edit-dialog'
 
 type DataContainerProps = {
   data: Container[]
+  onSuccess: () => void
 }
-export function ContainerTable({ data }: DataContainerProps) {
+export function ContainerTable({ data, onSuccess }: DataContainerProps) {
   const [rowSelection, setRowSelection] = useState({})
   const [replaceContainers, setReplaceContainers] = useState<
     ContainerReplace[]
@@ -41,6 +47,7 @@ export function ContainerTable({ data }: DataContainerProps) {
     null
   )
   const [openEdit, setOpenEdit] = useState(false)
+  const [openAlert, setOpenAlert] = useState(false)
   const table = useReactTable({
     data,
     columns,
@@ -59,6 +66,19 @@ export function ContainerTable({ data }: DataContainerProps) {
       console.log('Lỗi tải dữ liệu thay thế:', error)
     }
   }
+  const handleDelete = async () => {
+    try {
+      const selectedRows = table.getSelectedRowModel().rows
+      const selectedIds = selectedRows.map((row) => row.original.containerType)
+      await deleteContainerTypes(selectedIds)
+      if (onSuccess) {
+        onSuccess()
+        setRowSelection({})
+      }
+    } catch (error) {
+      console.log('Lỗi xóa loại container', error)
+    }
+  }
   return (
     <div>
       <div className='mt-4 flex'>
@@ -68,6 +88,7 @@ export function ContainerTable({ data }: DataContainerProps) {
         <Button
           variant={'outline'}
           className='group ml-2 flex w-8 items-center justify-center hover:border-orange-500 hover:bg-white'
+          onClick={() => setOpenAlert(true)}
         >
           <Trash className='h-4 w-4 group-hover:text-orange-500' />
         </Button>
@@ -154,6 +175,13 @@ export function ContainerTable({ data }: DataContainerProps) {
           open={openEdit}
           onOpenChange={setOpenEdit}
           typeOfContainer={editContainerType}
+        />
+      )}
+      {openAlert && (
+        <ContainerAlertDeleteDialog
+          open={openAlert}
+          onOpenChange={setOpenAlert}
+          confirm={handleDelete}
         />
       )}
     </div>
