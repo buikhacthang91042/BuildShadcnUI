@@ -2,7 +2,6 @@ import {
   Construction,
   LayoutDashboard,
   Monitor,
-  Bug,
   ListTodo,
   FileX,
   HelpCircle,
@@ -21,6 +20,7 @@ import {
   AudioWaveform,
   Command,
   GalleryVerticalEnd,
+  Container,
 } from 'lucide-react'
 import { ClerkLogo } from '@/assets/clerk-logo'
 import { type SidebarData } from '../types'
@@ -128,16 +128,16 @@ export const sidebarData: SidebarData = {
           ],
         },
         {
-          title: 'Errors',
-          icon: Bug,
+          title: 'Thiết lập COS',
+          icon: Container,
           items: [
             {
-              title: 'Unauthorized',
-              url: '/errors/unauthorized',
+              title: 'Loại container',
+              url: '/main/settings/cos/container',
               icon: Lock,
             },
             {
-              title: 'Forbidden',
+              title: 'Danh mục hàng hóa',
               url: '/errors/forbidden',
               icon: UserX,
             },
