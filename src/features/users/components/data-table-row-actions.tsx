@@ -1,6 +1,6 @@
 import { DotsHorizontalIcon } from '@radix-ui/react-icons'
 import { type Row } from '@tanstack/react-table'
-import { Trash2, UserPen } from 'lucide-react'
+import { ShieldUser, Trash2, UserPen } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -10,11 +10,11 @@ import {
   DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { type User } from '../data/schema'
+import { type Role } from '../data/schema'
 import { useUsers } from './users-provider'
 
 type DataTableRowActionsProps = {
-  row: Row<User>
+  row: Row<Role>
 }
 
 export function DataTableRowActions({ row }: DataTableRowActionsProps) {
@@ -38,11 +38,24 @@ export function DataTableRowActions({ row }: DataTableRowActionsProps) {
               setOpen('edit')
             }}
           >
-            Edit
+            Chỉnh sửa
             <DropdownMenuShortcut>
               <UserPen size={16} />
             </DropdownMenuShortcut>
           </DropdownMenuItem>
+
+          <DropdownMenuItem
+            onClick={() => {
+              setCurrentRow(row.original)
+              setOpen('decentralization')
+            }}
+          >
+            Phân quyền
+            <DropdownMenuShortcut>
+              <ShieldUser size={16} />
+            </DropdownMenuShortcut>
+          </DropdownMenuItem>
+
           <DropdownMenuSeparator />
           <DropdownMenuItem
             onClick={() => {
@@ -51,7 +64,7 @@ export function DataTableRowActions({ row }: DataTableRowActionsProps) {
             }}
             className='text-red-500!'
           >
-            Delete
+            Xóa
             <DropdownMenuShortcut>
               <Trash2 size={16} />
             </DropdownMenuShortcut>

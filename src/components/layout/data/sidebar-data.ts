@@ -74,7 +74,7 @@ export const sidebarData: SidebarData = {
           icon: MessagesSquare,
         },
         {
-          title: 'Users',
+          title: 'Vai trò và phân quyền',
           url: '/users',
           icon: Users,
         },
