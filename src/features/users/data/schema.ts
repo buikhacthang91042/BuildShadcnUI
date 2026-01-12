@@ -46,3 +46,17 @@ export const roleResponseSchema = z.object({
 })
 
 export type RoleResponse = z.infer<typeof roleResponseSchema>
+
+export type Permission = {
+  name: string
+  displayName: string | null
+  isGranted: boolean
+  grantedProviders: any[]
+}
+
+export type PermissionNode = {
+  name: string
+  displayName: string
+  children: PermissionNode[]
+  permissions: Permission[]
+}
