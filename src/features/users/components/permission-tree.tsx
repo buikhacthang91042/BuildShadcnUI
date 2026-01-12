@@ -1,114 +1,126 @@
-import { findAllIds } from '@/lib/find-all-ids'
-import { TreeView } from '@/components/tree-select/tree-view'
+import { useState } from 'react'
+import { ChevronDown, ChevronRight } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
 
-type ApiPermission = {
-  name: string
-  displayName: string | null
-  isGranted: boolean
-}
-
-type ApiNode = {
-  name: string
-  displayName: string
-  children: ApiNode[]
-  permissions?: ApiPermission[]
-}
-
-type TreeItem = {
-  value: string
+export type PermissionTreeNode = {
+  id: string
   label: string
-  type: 'folder' | 'file'
-  children?: TreeItem[]
+  children?: PermissionTreeNode[]
 }
-
-type Props = {
-  data: ApiNode[]
+type PermissionTreeProps = {
+  data: PermissionTreeNode[]
   checked: Record<string, boolean>
+  indeterminate?: Record<string, boolean>
   onCheck: (id: string, checked: boolean) => void
+  onToggle?: (id: string, checked: boolean) => void
 }
 
-function mapApiToTreeViewItem(
-  nodes: ApiNode[],
-  parentPath: string = ''
-): TreeItem[] {
-  return nodes.map<TreeItem>((node) => {
-    const nodeId = parentPath ? `${parentPath}/${node.name}` : node.name
-
-    const childrenFromModules: TreeItem[] = node.children?.length
-      ? mapApiToTreeViewItem(node.children, nodeId)
-      : []
-
-    const childrenFromPermissions: TreeItem[] =
-      node.permissions?.map<TreeItem>((p) => {
-        const permissionName =
-          p.name && p.name !== 'undefined' ? p.name.trim() : ''
-
-        // 👇 GHÉP CHUẨN
-        const fullPermissionName = permissionName.includes('.')
-          ? permissionName
-          : `${node.name}.${permissionName}`
-
-        return {
-          id: `${nodeId}/${fullPermissionName}`,
-          value: `${nodeId}/${fullPermissionName}`,
-          label: fullPermissionName,
-          type: 'file',
-        }
-      }) ?? []
-
-    return {
-      id: nodeId,
-      value: nodeId,
-      label: node.displayName?.trim() || node.name,
-      type: 'folder',
-      children: [...childrenFromModules, ...childrenFromPermissions],
-    }
-  })
-}
-
-export function PermissionTree({ data, checked, onCheck }: Props) {
-  const treeViewData = mapApiToTreeViewItem(data)
-  // Debug duplicate values
-  const checkDuplicates = (items: TreeItem[], path = ''): string[] => {
-    const duplicates: string[] = []
-    const seen = new Set<string>()
-    items.forEach((item) => {
-      const fullPath = `${path}/${item.value}`
-      if (seen.has(item.value)) {
-        duplicates.push(item.value)
-      } else {
-        seen.add(item.value)
-      }
-      if (item.children) {
-        duplicates.push(...checkDuplicates(item.children, fullPath))
-      }
-    })
-    return duplicates
-  }
-  const dups = checkDuplicates(treeViewData)
-  if (dups.length > 0) {
-    console.error('Duplicate values found:', dups)
-  }
-  const allTreeIds = findAllIds(treeViewData)
-  const checkedIds = Object.entries(checked)
-    .filter(([id, v]) => v && allTreeIds.includes(id))
-    .map(([id]) => id)
-
+export function PermissionTree({
+  data,
+  checked,
+  onCheck,
+}: PermissionTreeProps) {
   return (
-    <TreeView
-      data={treeViewData}
-      value={checkedIds}
-      onValueChange={(values) => {
-        values.forEach((id) => {
-          onCheck(id, true)
-        })
+    <div>
+      {data.map((node, index) => {
+        const rootPath = node.id ?? `root-${crypto.randomUUID()}`
 
-        checkedIds
-          .filter((id) => !values.includes(id))
-          .forEach((id) => {
-            onCheck(id, false)
-          })
-      }}
-    />
+        return (
+          <TreeNode
+            key={rootPath}
+            node={node}
+            checked={checked}
+            onCheck={onCheck}
+            level={0}
+            path={rootPath}
+          />
+        )
+      })}
+    </div>
+  )
+}
+
+function TreeNode({
+  node,
+  checked,
+  indeterminate = {},
+  onCheck,
+  level,
+  path,
+}: {
+  node: PermissionTreeNode
+  checked: Record<string, boolean>
+  indeterminate?: Record<string, boolean>
+  onCheck: (id: string, checked: boolean) => void
+  level: number
+  path: string
+}) {
+  const [open, setOpen] = useState(true)
+  const hasChildren = node.children && node.children.length > 0
+  const isChecked = !!checked[node.id]
+  const isIndeterminate = !!indeterminate[node.id] && !isChecked
+  const handleSingleCheck = (checked: boolean) => {
+    onCheck(node.id, checked)
+  }
+  const handleCheckWithCascade = (checked: boolean) => {
+    onCheck(node.id, checked)
+    const cascadeChildren = (n: PermissionTreeNode) => {
+      n.children?.forEach((child) => {
+        onCheck(child.id, checked)
+        if (child.children?.length) {
+          cascadeChildren(child)
+        }
+      })
+    }
+
+    if (hasChildren) {
+      cascadeChildren(node)
+    }
+  }
+  return (
+    <div>
+      <div
+        className='flex items-center gap-2 py-1'
+        style={{ paddingLeft: level * 16 }}
+      >
+        {hasChildren ? (
+          <Button
+            variant='outline'
+            size='icon'
+            className='h-6 w-6'
+            onClick={() => setOpen(!open)}
+          >
+            {open ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+          </Button>
+        ) : (
+          <span className='w-6' />
+        )}
+
+        <Checkbox
+          checked={isIndeterminate ? 'indeterminate' : isChecked}
+          onCheckedChange={(v) => {
+            handleCheckWithCascade(!!v)
+          }}
+        />
+        <span className='text-sm'>{node.label}</span>
+      </div>
+
+      {hasChildren && open && (
+        <div>
+          {node.children!.map((child, idx) => (
+            <TreeNode
+              key={child.id || `${path}/child-${idx}-${child.label}`}
+              node={child}
+              checked={checked}
+              indeterminate={indeterminate}
+              onCheck={onCheck}
+              level={level + 1}
+              path={`${path}/${child.id || idx}`}
+            />
+          ))}
+        </div>
+      )}
+    </div>
   )
 }

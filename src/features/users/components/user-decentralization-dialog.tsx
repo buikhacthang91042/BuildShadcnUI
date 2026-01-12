@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react'
 import { getPermissionsByRole } from '@/stores/user-store'
+import { Button } from '@/components/ui/button'
 import {
   Dialog,
   DialogContent,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
@@ -69,6 +71,9 @@ export function UserDecentralization({
           />
         </div>
       </DialogContent>
+      <DialogFooter>
+        <Button>Thêm</Button>
+      </DialogFooter>
     </Dialog>
   )
 }
