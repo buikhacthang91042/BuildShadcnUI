@@ -23,12 +23,12 @@ import {
 } from '@/components/ui/table'
 import { DataTablePagination, DataTableToolbar } from '@/components/data-table'
 import { roles } from '../data/data'
-import { type User } from '../data/schema'
+import { type Role } from '../data/schema'
 import { DataTableBulkActions } from './data-table-bulk-actions'
 import { usersColumns as columns } from './users-columns'
 
 type DataTableProps = {
-  data: User[]
+  data: Role[]
   search: Record<string, unknown>
   navigate: NavigateFn
 }
@@ -57,9 +57,6 @@ export function UsersTable({ data, search, navigate }: DataTableProps) {
     globalFilter: { enabled: false },
     columnFilters: [
       // username per-column text filter
-      { columnId: 'username', searchKey: 'username', type: 'string' },
-      { columnId: 'status', searchKey: 'status', type: 'array' },
-      { columnId: 'role', searchKey: 'role', type: 'array' },
     ],
   })
 
@@ -101,9 +98,9 @@ export function UsersTable({ data, search, navigate }: DataTableProps) {
     >
       <DataTableToolbar
         table={table}
-        searchPlaceholder='Filter users...'
-        searchKey='username'
-        filters={[
+        searchPlaceholder='Tìm kiếm'
+        searchKey='name'
+        /*     filters={[
           {
             columnId: 'status',
             title: 'Status',
@@ -119,7 +116,7 @@ export function UsersTable({ data, search, navigate }: DataTableProps) {
             title: 'Role',
             options: roles.map((role) => ({ ...role })),
           },
-        ]}
+        ]} */
       />
       <div className='overflow-hidden rounded-md border'>
         <Table>
@@ -188,7 +185,7 @@ export function UsersTable({ data, search, navigate }: DataTableProps) {
         </Table>
       </div>
       <DataTablePagination table={table} className='mt-auto' />
-      <DataTableBulkActions table={table} />
+      <DataTableBulkActions table={table} />{' '}
     </div>
   )
 }

@@ -1,4 +1,6 @@
+import { useEffect, useState } from 'react'
 import { getRouteApi } from '@tanstack/react-router'
+import { getRoleName } from '@/stores/user-store'
 import { ConfigDrawer } from '@/components/config-drawer'
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
@@ -9,14 +11,25 @@ import { UsersDialogs } from './components/users-dialogs'
 import { UsersPrimaryButtons } from './components/users-primary-buttons'
 import { UsersProvider } from './components/users-provider'
 import { UsersTable } from './components/users-table'
-import { users } from './data/users'
+import { Role } from './data/schema'
 
 const route = getRouteApi('/_authenticated/users/')
 
 export function Users() {
   const search = route.useSearch()
   const navigate = route.useNavigate()
+  const [users, setUsers] = useState<Role[]>([])
+  const pageSize = 20
+  const pageIndex = 1
+  const reloadRoleName = () => {
+    getRoleName(pageIndex, pageSize)
+      .then((res) => setUsers(res.items))
+      .catch((err) => console.log('Lỗi tải dữ liệu role name', err))
+  }
 
+  useEffect(() => {
+    reloadRoleName()
+  }, [])
   return (
     <UsersProvider>
       <Header fixed>
@@ -31,17 +44,14 @@ export function Users() {
       <Main className='flex flex-1 flex-col gap-4 sm:gap-6'>
         <div className='flex flex-wrap items-end justify-between gap-2'>
           <div>
-            <h2 className='text-2xl font-bold tracking-tight'>User List</h2>
-            <p className='text-muted-foreground'>
-              Manage your users and their roles here.
-            </p>
+            <h2 className='text-2xl font-bold tracking-tight'>Vai trò</h2>
           </div>
           <UsersPrimaryButtons />
         </div>
         <UsersTable data={users} search={search} navigate={navigate} />
       </Main>
 
-      <UsersDialogs />
+      <UsersDialogs reloadRoleName={reloadRoleName} />
     </UsersProvider>
   )
 }

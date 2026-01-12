@@ -1,22 +1,23 @@
+import { UserDecentralization } from './user-decentralization-dialog'
 import { UsersActionDialog } from './users-action-dialog'
 import { UsersDeleteDialog } from './users-delete-dialog'
-import { UsersInviteDialog } from './users-invite-dialog'
 import { useUsers } from './users-provider'
 
-export function UsersDialogs() {
+export function UsersDialogs({
+  reloadRoleName,
+}: {
+  reloadRoleName: () => void
+}) {
   const { open, setOpen, currentRow, setCurrentRow } = useUsers()
+  console.log('open', open, 'currentRow', currentRow)
+
   return (
     <>
       <UsersActionDialog
         key='user-add'
         open={open === 'add'}
         onOpenChange={() => setOpen('add')}
-      />
-
-      <UsersInviteDialog
-        key='user-invite'
-        open={open === 'invite'}
-        onOpenChange={() => setOpen('invite')}
+        reloadRoleName={reloadRoleName}
       />
 
       {currentRow && (
@@ -31,8 +32,17 @@ export function UsersDialogs() {
               }, 500)
             }}
             currentRow={currentRow}
+            reloadRoleName={reloadRoleName}
           />
-
+          <UserDecentralization
+            key={`user-decentralization-${currentRow.id}`}
+            open={open === 'decentralization'}
+            onOpenChange={(isOpen) => {
+              setOpen(isOpen ? 'decentralization' : null)
+            }}
+            currentRow={currentRow}
+            reloadRoleName={reloadRoleName}
+          />
           <UsersDeleteDialog
             key={`user-delete-${currentRow.id}`}
             open={open === 'delete'}
@@ -43,6 +53,7 @@ export function UsersDialogs() {
               }, 500)
             }}
             currentRow={currentRow}
+            reloadRoleName={reloadRoleName}
           />
         </>
       )}
